@@ -12,7 +12,7 @@ The AsyncAPI Specification is licensed under [The Apache License, Version 2.0](h
 
 ## Introduction
 
-The AsyncAPI Specification is a project used to describe and document message-driven APIs in a machine-readable format. It’s protocol-agnostic, so you can use it for APIs that work over any protocol (e.g., AMQP, MQTT, WebSockets, Kafka, STOMP, HTTP, etc).
+The AsyncAPI Specification is a project used to describe and document message-driven APIs in a machine-readable format. It’s protocol-agnostic, so you can use it for APIs that work over any protocol (e.g., AMQP, MQTT, WebSockets, Kafka, STOMP, HTTP, Mercure, etc).
 
 The AsyncAPI Specification defines a set of files required to describe such an API.
 These files can then be used to create utilities, such as documentation, integration and/or testing tools.
@@ -27,7 +27,7 @@ user/signedup:
 
 It means that the [application](#definitionsApplication) allows [consumers](#definitionsConsumer) to subscribe to the `user/signedup` [channel](#definitionsChannel) to receive userSignUp [messages](#definitionsMessage).
 
-**The AsyncAPI specification does not assume any kind of software topology, architecture or pattern.** Therefore, a server MAY be a message broker, a web server or any other kind of computer program capable of sending and/or receiving data. However, AsyncAPI offers a mechanism called "bindings" that aims to help with more specific information about the protocol and/or the topology.
+**The AsyncAPI specification does not assume any kind of software topology, architecture or pattern.** Therefore, a server MAY be a message broker, a web server or any other kind of computer program capable of sending and/or receiving data. However, AsyncAPI offers a mechanism called "bindings" that aims to help with more specific information about the protocol.
 
 ## Table of Contents
 <!-- TOC depthFrom:2 depthTo:4 withLinks:1 updateOnSave:0 orderedList:0 -->
@@ -90,7 +90,10 @@ A message is the mechanism by which information is exchanged via a channel betwe
 A channel is an addressable component, made available by the server, for the organization of [messages](#definitionsMessage). [Producer](#definitionsProducer) applications send messages to channels and [consumer](#definitionsConsumer) applications consume messages from channels. Servers MAY support many channel instances, allowing messages with different content to be addressed to different channels. Depending on the server implementation, the channel MAY be included in the message via protocol-defined headers.
 
 #### <a name="definitionsProtocol"></a>Protocol
-A protocol is the mechanism (wireline protocol OR API) by which [messages](#definitionsMessage) are exchanged between the application and the [channel](#definitionsChannel). Example protocol include, but are not limited to, AMQP, HTTP, JMS, Kafka, MQTT, STOMP, WebSocket.  
+A protocol is the mechanism (wireline protocol or API) by which [messages](#definitionsMessage) are exchanged between the application and the [channel](#definitionsChannel). Example protocols include, but are not limited to, AMQP, HTTP, JMS, Kafka, MQTT, STOMP, Mercure, WebSocket.  
+
+#### <a name="definitionsBindings"></a>Bindings
+A "binding" (or "protocol binding") is a mechanism to define protocol-specific information. Therefore, a protocol binding MUST define protocol-specific information only. 
 
 ## <a name="specification"></a>Specification
 
@@ -339,12 +342,12 @@ An object representing a message broker, a server or any other kind of computer 
 Field Name | Type | Description
 ---|:---:|---
 <a name="serverObjectUrl"></a>url | `string` | **REQUIRED**. A URL to the target host.  This URL supports Server Variables and MAY be relative, to indicate that the host location is relative to the location where the AsyncAPI document is being served. Variable substitutions will be made when a variable is named in `{`brackets`}`.
-<a name="serverObjectProtocol"></a>protocol | `string` | **REQUIRED**. The protocol this URL supports for connection. Supported protocol include, but are not limited to: `amqp`, `amqps`, `http`, `https`, `jms`, `kafka`, `kafka-secure`, `mqtt`, `secure-mqtt`, `stomp`, `stomps`, `ws`, `wss`.
+<a name="serverObjectProtocol"></a>protocol | `string` | **REQUIRED**. The protocol this URL supports for connection. Supported protocol include, but are not limited to: `amqp`, `amqps`, `http`, `https`, `jms`, `kafka`, `kafka-secure`, `mqtt`, `secure-mqtt`, `stomp`, `stomps`, `ws`, `wss`, `mercure`.
 <a name="serverObjectProtocolVersion"></a>protocolVersion | `string` | The version of the protocol used for connection. For instance: AMQP `0.9.1`, HTTP `2.0`, Kafka `1.0.0`, etc.
 <a name="serverObjectDescription"></a>description | `string` | An optional string describing the host designated by the URL. [CommonMark syntax](http://spec.commonmark.org/) MAY be used for rich text representation.
 <a name="serverObjectVariables"></a>variables | Map[`string`, [Server Variable Object](#serverVariableObject)] | A map between a variable name and its value.  The value is used for substitution in the server's URL template.
 <a name="serverObjectSecurity"></a>security | [[Security Requirement Object](#securityRequirementObject)] | A declaration of which security mechanisms can be used with this server. The list of values includes alternative security requirement objects that can be used. Only one of the security requirement objects need to be satisfied to authorize a connection or operation.
-<a name="serverObjectBindings"></a>bindings | [Server Bindings Object](#serverBindingsObject) | A free-form map where the keys describe the name of the protocol and the values describe protocol-specific definitions for the server.
+<a name="serverObjectBindings"></a>bindings | [Server Bindings Object](#serverBindingsObject) | A map where the keys describe the name of the protocol and the values describe protocol-specific definitions for the server.
 
 This object MAY be extended with [Specification Extensions](#specificationExtensions).
 
@@ -548,7 +551,7 @@ Field Name | Type | Description
 <a name="channelItemObjectSubscribe"></a>subscribe | [Operation Object](#operationObject) | A definition of the SUBSCRIBE operation.
 <a name="channelItemObjectPublish"></a>publish | [Operation Object](#operationObject) | A definition of the PUBLISH operation.
 <a name="channelItemObjectParameters"></a>parameters | [Parameters Object](#parametersObject) | A map of the parameters included in the channel name. It SHOULD be present only when using channels with expressions (as defined by [RFC 6570 section 2.2](https://tools.ietf.org/html/rfc6570#section-2.2)).
-<a name="channelItemObjectBindings"></a>bindings | [Channel Bindings Object](#channelBindingsObject) | A free-form map where the keys describe the name of the protocol and the values describe protocol-specific definitions for the channel.
+<a name="channelItemObjectBindings"></a>bindings | [Channel Bindings Object](#channelBindingsObject) | A map where the keys describe the name of the protocol and the values describe protocol-specific definitions for the channel.
 
 This object can be extended with [Specification Extensions](#specificationExtensions).
 
@@ -646,9 +649,9 @@ Field Name | Type | Description
 <a name="operationObjectDescription"></a>description | `string` | A verbose explanation of the operation. [CommonMark syntax](http://spec.commonmark.org/) can be used for rich text representation.
 <a name="operationObjectTags"></a>tags | [[Tag Object](#tagObject)] | A list of tags for API documentation control. Tags can be used for logical grouping of operations.
 <a name="operationObjectExternalDocs"></a>externalDocs | [External Documentation Object](#externalDocumentationObject) | Additional external documentation for this operation.
-<a name="operationObjectBindings"></a>bindings | [Operation Bindings Object](#operationBindingsObject) | A free-form map where the keys describe the name of the protocol and the values describe protocol-specific definitions for the operation.
-<a name="operationObjectTraits"></a>traits | [[Operation Trait Object](#operationTraitObject)] | A list of traits to apply to the operation object. Traits MUST be merged into the operation object using the [JSON Merge Patch](https://tools.ietf.org/html/rfc7386) algorithm in the same order they are defined here.
-<a name="operationObjectMessage"></a>message | [Message Object](#messageObject) | A definition of the message that will be published or received on this channel. `oneOf` is allowed here to specify multiple messages, however, **a message MUST be valid only against one of the referenced message objects.**
+<a name="operationObjectBindings"></a>bindings | [Operation Bindings Object](#operationBindingsObject) | A map where the keys describe the name of the protocol and the values describe protocol-specific definitions for the operation.
+<a name="operationObjectTraits"></a>traits | [[Operation Trait Object](#operationTraitObject) &#124; [Reference Object](#referenceObject) ] | A list of traits to apply to the operation object. Traits MUST be merged into the operation object using the [JSON Merge Patch](https://tools.ietf.org/html/rfc7386) algorithm in the same order they are defined here.
+<a name="operationObjectMessage"></a>message | [[Message Object](#messageObject) &#124; [Reference Object](#referenceObject)] | A definition of the message that will be published or received on this channel. `oneOf` is allowed here to specify multiple messages, however, **a message MUST be valid only against one of the referenced message objects.**
 
 This object can be extended with [Specification Extensions](#specificationExtensions).
 
@@ -744,7 +747,7 @@ Field Name | Type | Description
 <a name="operationTraitObjectDescription"></a>description | `string` | A verbose explanation of the operation. [CommonMark syntax](http://spec.commonmark.org/) can be used for rich text representation.
 <a name="operationTraitObjectTags"></a>tags | [Tags Object](#tagsObject) | A list of tags for API documentation control. Tags can be used for logical grouping of operations.
 <a name="operationTraitObjectExternalDocs"></a>externalDocs | [External Documentation Object](#externalDocumentationObject) | Additional external documentation for this operation.
-<a name="operationTraitObjectBindings"></a>bindings | [Operation Bindings Object](#operationBindingsObject) | A free-form map where the keys describe the name of the protocol and the values describe protocol-specific definitions for the operation.
+<a name="operationTraitObjectBindings"></a>bindings | [Operation Bindings Object](#operationBindingsObject) | A map where the keys describe the name of the protocol and the values describe protocol-specific definitions for the operation.
 
 This object can be extended with [Specification Extensions](#specificationExtensions).
 
@@ -887,7 +890,9 @@ Field Name | Type | Description
 <a name="serverBindingsObjectSQS"></a>`sqs` | [SQS Server Binding](https://github.com/asyncapi/bindings/blob/master/sqs#server) | Protocol-specific information for an SQS server.
 <a name="serverBindingsObjectSTOMP"></a>`stomp` | [STOMP Server Binding](https://github.com/asyncapi/bindings/blob/master/stomp#server) | Protocol-specific information for a STOMP server.
 <a name="serverBindingsObjectRedis"></a>`redis` | [Redis Server Binding](https://github.com/asyncapi/bindings/blob/master/redis#server) | Protocol-specific information for a Redis server.
+<a name="serverBindingsObjectMercure"></a>`mercure` | [Mercure Server Binding](https://github.com/asyncapi/bindings/blob/master/mercure#server) | Protocol-specific information for a Mercure server.
 
+This object can be extended with [Specification Extensions](#specificationExtensions).
 
 
 
@@ -912,7 +917,9 @@ Field Name | Type | Description
 <a name="channelBindingsObjectSQS"></a>`sqs` | [SQS Channel Binding](https://github.com/asyncapi/bindings/blob/master/sqs/README.md#channel) | Protocol-specific information for an SQS channel.
 <a name="channelBindingsObjectSTOMP"></a>`stomp` | [STOMP Channel Binding](https://github.com/asyncapi/bindings/blob/master/stomp/README.md#channel) | Protocol-specific information for a STOMP channel.
 <a name="channelBindingsObjectRedis"></a>`redis` | [Redis Channel Binding](https://github.com/asyncapi/bindings/blob/master/redis#channel) | Protocol-specific information for a Redis channel.
+<a name="channelBindingsObjectMercure"></a>`mercure` | [Mercure Channel Binding](https://github.com/asyncapi/bindings/blob/master/mercure#channel) | Protocol-specific information for a Mercure channel.
 
+This object can be extended with [Specification Extensions](#specificationExtensions).
 
 
 
@@ -937,8 +944,9 @@ Field Name | Type | Description
 <a name="operationBindingsObjectSQS"></a>`sqs` | [SQS Operation Binding](https://github.com/asyncapi/bindings/blob/master/sqs/README.md#operation) | Protocol-specific information for an SQS operation.
 <a name="operationBindingsObjectSTOMP"></a>`stomp` | [STOMP Operation Binding](https://github.com/asyncapi/bindings/blob/master/stomp/README.md#operation) | Protocol-specific information for a STOMP operation.
 <a name="operationBindingsObjectRedis"></a>`redis` | [Redis Operation Binding](https://github.com/asyncapi/bindings/blob/master/redis#operation) | Protocol-specific information for a Redis operation.
+<a name="operationBindingsObjectMercure"></a>`mercure` | [Mercure Operation Binding](https://github.com/asyncapi/bindings/blob/master/mercure#operation) | Protocol-specific information for a Mercure operation.
 
-
+This object can be extended with [Specification Extensions](#specificationExtensions).
 
 
 
@@ -964,8 +972,9 @@ Field Name | Type | Description
 <a name="messageBindingsObjectSQS"></a>`sqs` | [SQS Message Binding](https://github.com/asyncapi/bindings/blob/master/sqs/README.md#message) | Protocol-specific information for an SQS message.
 <a name="messageBindingsObjectSTOMP"></a>`stomp` | [STOMP Message Binding](https://github.com/asyncapi/bindings/blob/master/stomp/README.md#message) | Protocol-specific information for a STOMP message.
 <a name="messageBindingsObjectRedis"></a>`redis` | [Redis Message Binding](https://github.com/asyncapi/bindings/blob/master/redis#message) | Protocol-specific information for a Redis message.
+<a name="messageBindingsObjectMercure"></a>`mercure` | [Mercure Message Binding](https://github.com/asyncapi/bindings/blob/master/mercure#message) | Protocol-specific information for a Mercure message.
 
-
+This object can be extended with [Specification Extensions](#specificationExtensions).
 
 
 
@@ -992,9 +1001,9 @@ Field Name | Type | Description
 <a name="messageObjectDescription"></a>description | `string` | A verbose explanation of the message. [CommonMark syntax](http://spec.commonmark.org/) can be used for rich text representation.
 <a name="messageObjectTags"></a>tags | [Tags Object](#tagsObject) | A list of tags for API documentation control. Tags can be used for logical grouping of messages.
 <a name="messageObjectExternalDocs"></a>externalDocs | [External Documentation Object](#externalDocumentationObject) | Additional external documentation for this message.
-<a name="messageObjectBindings"></a>bindings | [Message Bindings Object](#messageBindingsObject) | A free-form map where the keys describe the name of the protocol and the values describe protocol-specific definitions for the message.
+<a name="messageObjectBindings"></a>bindings | [Message Bindings Object](#messageBindingsObject) | A map where the keys describe the name of the protocol and the values describe protocol-specific definitions for the message.
 <a name="messageObjectExamples"></a>examples | [Map[`string`, `any`]] | An array with examples of valid message objects.
-<a name="messageObjectTraits"></a>traits | [[Message Trait Object](#messageTraitObject)] | A list of traits to apply to the message object. Traits MUST be merged into the message object using the [JSON Merge Patch](https://tools.ietf.org/html/rfc7386) algorithm in the same order they are defined here. The resulting object MUST be a valid [Message Object](#messageObject).
+<a name="messageObjectTraits"></a>traits | [[Message Trait Object](#messageTraitObject) &#124; [Reference Object](#referenceObject)] | A list of traits to apply to the message object. Traits MUST be merged into the message object using the [JSON Merge Patch](https://tools.ietf.org/html/rfc7386) algorithm in the same order they are defined here. The resulting object MUST be a valid [Message Object](#messageObject).
 
 This object can be extended with [Specification Extensions](#specificationExtensions).
 
@@ -1005,9 +1014,15 @@ The following table contains a set of values that every implementation MUST supp
 Name | Allowed values | Notes
 ---|:---:|---
 [AsyncAPI 2.0.0 Schema Object](#schemaObject) | `application/vnd.aai.asyncapi;version=2.0.0`, `application/vnd.aai.asyncapi+json;version=2.0.0`, `application/vnd.aai.asyncapi+yaml;version=2.0.0` | This is the default when a `schemaFormat` is not provided.
-[OpenAPI 3.0.0 Schema Object](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.0.md#schemaObject) | `application/vnd.oai.openapi;version=3.0.0`, `application/vnd.oai.openapi+json;version=3.0.0`, `application/vnd.oai.openapi+yaml;version=3.0.0` | 
 [JSON Schema Draft 07](http://json-schema.org/specification-links.html#draft-7) | `application/schema+json;version=draft-07`, `application/schema+yaml;version=draft-07` | 
+
+The following table contains a set of values that every implementation is RECOMMENDED to support.
+
+Name | Allowed values | Notes
+---|:---:|---
 [Avro 1.9.0 schema](https://avro.apache.org/docs/1.9.0/spec.html#schemas) | `application/vnd.apache.avro;version=1.9.0`, `application/vnd.apache.avro+json;version=1.9.0`, `application/vnd.apache.avro+yaml;version=1.9.0` |
+[OpenAPI 3.0.0 Schema Object](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.0.md#schemaObject) | `application/vnd.oai.openapi;version=3.0.0`, `application/vnd.oai.openapi+json;version=3.0.0`, `application/vnd.oai.openapi+yaml;version=3.0.0` | 
+[RAML 1.0 data type](https://github.com/raml-org/raml-spec/blob/master/versions/raml-10/raml-10.md/) | `application/raml+yaml;version=1.0` |
 
 
 ##### Message Object Example
@@ -1151,7 +1166,7 @@ Field Name | Type | Description
 <a name="messageTraitObjectDescription"></a>description | `string` | A verbose explanation of the message. [CommonMark syntax](http://spec.commonmark.org/) can be used for rich text representation.
 <a name="messageTraitObjectTags"></a>tags | [Tags Object](#tagsObject) | A list of tags for API documentation control. Tags can be used for logical grouping of messages.
 <a name="messageTraitObjectExternalDocs"></a>externalDocs | [External Documentation Object](#externalDocumentationObject) | Additional external documentation for this message.
-<a name="messageTraitObjectBindings"></a>bindings | [Message Bindings Object](#messageBindingsObject) | A free-form map where the keys describe the name of the protocol and the values describe protocol-specific definitions for the message.
+<a name="messageTraitObjectBindings"></a>bindings | [Message Bindings Object](#messageBindingsObject) | A map where the keys describe the name of the protocol and the values describe protocol-specific definitions for the message.
 <a name="messageTraitObjectExamples"></a>examples | [Map[`string`, `any`]] | An array with examples of valid message objects.
 
 This object can be extended with [Specification Extensions](#specificationExtensions).
@@ -1531,6 +1546,7 @@ To support polymorphism, AsyncAPI Specification adds the support of the `discrim
 When used, the `discriminator` will be the name of the property used to decide which schema definition is used to validate the structure of the model.
 As such, the `discriminator` field MUST be a required field.
 There are are two ways to define the value of a discriminator for an inheriting instance.
+
 - Use the schema's name.
 - Override the schema's name by overriding the property with a new value. If exists, this takes precedence over the schema's name.
 
@@ -1803,6 +1819,28 @@ schemas:
           ]
         }
       ]
+    },
+    "StickInsect": {
+      "description": "A representation of an Australian walking stick. Note that `StickBug` will be used as the discriminator value.",
+      "allOf": [
+        {
+          "$ref": "#/components/schemas/Pet"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "petType": {
+              "const": "StickBug"
+            },
+            "color": {
+              "type": "string",
+            }
+          },
+          "required": [
+            "color"
+          ]
+        }
+      ]
     }
   }
 }
@@ -1821,7 +1859,9 @@ schemas:
     required:
     - name
     - petType
-  Cat:  ## "Cat" will be used as the discriminator value
+  ## applies to instances with `petType: "Cat"`
+  ## because that is the schema name
+  Cat:
     description: A representation of a cat
     allOf:
     - $ref: '#/components/schemas/Pet'
@@ -1837,7 +1877,9 @@ schemas:
           - aggressive
       required:
       - huntingSkill
-  Dog:  ## "Dog" will be used as the discriminator value
+  ## applies to instances with `petType: "Dog"`
+  ## because that is the schema name
+  Dog:
     description: A representation of a dog
     allOf:
     - $ref: '#/components/schemas/Pet'
@@ -1850,6 +1892,21 @@ schemas:
           minimum: 0
       required:
       - packSize
+  ## applies to instances with `petType: "StickBug"`
+  ## because that is the required value of the discriminator field,
+  ## overriding the schema name
+  StickInsect:
+    description: A representation of an Australian walking stick
+    allOf:
+    - $ref: '#/components/schemas/Pet'
+    - type: object
+      properties:
+        petType:
+          const: StickBug
+        color:
+          type: string
+      required:
+      - color
 ```
 
 
